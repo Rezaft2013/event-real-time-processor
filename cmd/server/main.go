@@ -1,21 +1,25 @@
 package main
 
-import (	
+import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	
-	"github.com/Rezaft2013/event-real-time-processor/internal/kafka"
+
 	"github.com/Rezaft2013/event-real-time-processor/internal/handlers"
+	"github.com/Rezaft2013/event-real-time-processor/internal/kafka"
 )
 
-func main() {	
-	go kafka.Consumer()
-	http.HandleFunc("/api/v1/event", handlers.EventHandler)
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	go kafka.Consumer(ctx)
+
+	http.HandleFunc("/api/v1/event", handlers.EventHandler)
 	server := http.Server{
 		Addr:        ":88",
 		ReadTimeout: 10 * time.Second,

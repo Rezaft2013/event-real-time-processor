@@ -10,11 +10,12 @@ CREATE TABLE events_partitioned (
 	event_version varchar(20) NOT NULL,
     tenant_id varchar(20) NOT NULL,
     payload JSONB,
-    created_at TIMESTAMPTZ NOT NULL,    
-    valid BOOLEAN,
-    validation_error TEXT,  
-    PRIMARY KEY (id, created_at)   
-) PARTITION BY RANGE (created_at);
+    event_timestamp TIMESTAMPTZ NOT NULL,    
+    valid_schema BOOLEAN NOT NULL,
+    schema_validation_error TEXT,  
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (id, event_timestamp)   
+) PARTITION BY RANGE (event_timestamp);
 
 -- Monthly partition for oct 2026
 CREATE TABLE events_y2026m10 PARTITION OF events_partitioned
