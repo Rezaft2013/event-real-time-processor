@@ -11,14 +11,21 @@ import (
 	"github.com/lib/pq"
 )
 
-func InsertEventToDB(evt *model.Event, validationErr error) error {
+// InsertEventToDB inserts input event and its validation status to events_gloal and events_partitioned ables
+func InsertEventToDB(evt *model.Event, validationErr error) (err error) {
 	connStr := "host=postgres_db port=5432 user=myuser password=mypassword dbname=events sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	var db *sql.DB
+	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Printf("error opening database connection: %v", err)
 		return err
 	}
-	defer db.Close()
+	defer func() {
+		closeErr := db.Close()
+		if closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	err = db.Ping()
 	if err != nil {
@@ -32,12 +39,17 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 		return fmt.Errorf("failed to begin tx: %w", err)
 	}
 
-	defer tx.Rollback()
+	defer func() {
+		closeErr := tx.Rollback()
+		if closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	query1 := `INSERT INTO events_global VALUES ($1)`
 	if _, err := tx.ExecContext(ctx, query1, evt.ID); err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
-			log.Printf("duplicate event %v. skipping.", evt)
+			log.Printf("duplicate event %v. skipping", evt)
 			return nil
 		} else {
 			log.Printf("failed to insert event %v into events_global, err = %s", evt, err)
@@ -45,7 +57,8 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 		}
 	}
 
-	query2 := `INSERT INTO events_partitioned (id, event_type, event_version, tenant_id, payload, event_timestamp, valid_schema, schema_validation_error) 
+	query2 := `INSERT INTO events_partitioned (id, event_type, event_version, tenant_id, 
+					payload, event_timestamp, valid_schema, schema_validation_error) 
 			               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
 	evtTimestamp := time.Unix(evt.Timestamp, 0)
@@ -64,10 +77,11 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 		return fmt.Errorf("failed to commit tx: %w", err)
 	}
 
-	fmt.Printf("successfully inserted event %v to database.\n", evt)
+	log.Printf("successfully inserted event %v to database", evt)
 	return nil
 }
 
+// CheckEventExists checks if an event exists in the database, mainly used to verifyy ingestion process
 func CheckEventExists(id string) (error, bool) {
 	connStr := "host=postgres_db port=5432 user=myuser password=mypassword dbname=events sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
@@ -75,7 +89,13 @@ func CheckEventExists(id string) (error, bool) {
 		log.Printf("error opening database connection: %v", err)
 		return err, false
 	}
-	defer db.Close()
+
+	defer func() {
+		closeErr := db.Close()
+		if closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	loadedID := ""
 	row := db.QueryRow(`SELECT id FROM events_partitioned WHERE id = $1`, id)

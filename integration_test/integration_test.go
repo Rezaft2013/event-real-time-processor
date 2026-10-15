@@ -14,6 +14,8 @@ import(
     "github.com/stretchr/testify/assert"
 )
 
+// TestE2E tests e2e event ingestion 
+// Note: cluster should be up and running before running this test
 func TestE2E(t *testing.T) {
 	jsonData := []byte(`{
     "id" : "629d06f2-2df9-4d67-af21-70aa4b88ad56",
@@ -30,14 +32,14 @@ func TestE2E(t *testing.T) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Request failed: %v\n", err)
+		log.Printf("Request failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
     assert.NotNil(t, resp)
 
 	body, _ := io.ReadAll(resp.Body)	
-    fmt.Println(string(body))
+    log.Println(string(body))
     assert.Equal(t, strings.Contains(string(body), "event received"), true, "failed to create the event")
 
     time.Sleep(5*time.Second)

@@ -1,9 +1,11 @@
 -- init-scripts/init.sql
+-- global table used to check globally unique event id
 CREATE TABLE events_global ( 
     id UUID NOT NULL,
 	PRIMARY KEY (id)
 );
 
+-- Partitioned events table 
 CREATE TABLE events_partitioned (
     id UUID NOT NULL,
     event_type TEXT NOT NULL,

@@ -8,13 +8,18 @@ import (
 	"log"
 )
 
+// WriteEventToTopic writes an event to specified kafkak topic
 func WriteEventToTopic(topic string, evt *model.Event) error {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"broker:29092"},
 		Topic:   topic,
 	})
 	writer.AllowAutoTopicCreation = true
-	defer writer.Close()
+	defer func() {
+		if err := writer.Close(); err != nil {
+			log.Printf("failed to close kafka %s topic writer, event=%v, error=%v", topic, evt, err)
+		}
+	}()
 
 	data, err := json.Marshal(evt)
 	if err != nil {

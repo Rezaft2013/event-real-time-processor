@@ -11,6 +11,7 @@ import (
 	"github.com/Rezaft2013/event-real-time-processor/internal/model"
 )
 
+// HttpCreateEventHandler handles POST /api/v1/events post request
 func HttpCreateEventHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -36,9 +37,14 @@ func HttpCreateEventHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-	fmt.Fprintf(w, "event received.")
+	_, err = fmt.Fprintf(w, "event received.")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
+// HttpGetEventHandler handles GET /api/v1/events/{id} request
+// this endpoint added to be used in integration tests
 func HttpGetEventHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -49,10 +55,16 @@ func HttpGetEventHandler(w http.ResponseWriter, req *http.Request) {
 	_, result := database.CheckEventExists(eventID)
 	if result {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "{ \"status\" : \"ok\" }")
+		_, err := fmt.Fprintf(w, "{ \"status\" : \"ok\" }")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
 	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "{ \"status\" : \"not found\" }")
+	_, err := fmt.Fprintf(w, "{ \"status\" : \"not found\" }")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

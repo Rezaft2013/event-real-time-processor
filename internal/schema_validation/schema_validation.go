@@ -5,6 +5,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
+// Hardcoded versions schemas
 const model_1_0_schema = `{
     "type": "object",
 	"properties": {
@@ -30,10 +31,12 @@ type schemaValidator struct {
 	validSchemaVersions map[string]string
 }
 
+// NewSchemaValidator creates an instance of schemaValidator
 func NewSchemaValidator() *schemaValidator {
 	return &schemaValidator{validSchemaVersions: map[string]string{"1.0": model_1_0_schema, "1.1": model_1_1_schema}}
 }
 
+// Validate validates input jsonDoc against a model version schema
 func (validator schemaValidator) Validate(modelVersion string, jsonValue string) error {
 
 	schema, found := validator.validSchemaVersions[modelVersion]

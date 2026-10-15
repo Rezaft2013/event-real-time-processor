@@ -16,6 +16,7 @@ func NewEventGRPCHandler() *EventGRPCHandler {
 	return &EventGRPCHandler{}
 }
 
+// CreateEvent handles create event grpc call
 func (h *EventGRPCHandler) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 	var evt model.Event
 	reqUid, err := uuid.Parse(req.Id)

@@ -59,14 +59,15 @@ The system is composed of the following pieces:
     ```
 * kafka server
     * kafka "events" topic : all incoming events queued up in this topic        
-    * kafka "events-deadletter" topic: all events that failed consumer processing added to this topic  
+    * kafka "events-deadletter" topic: all events that failed consumer processing added to this topic. A consumer can be added to store this topic to a datase or AWS S3.  
     * kafka "sender" topic: all valid events that pass consumer processing added to this topic to be used by senders application consumers
 * postgres db
     * "events_partitioned" table partitioned by date for each month 
     * "events" global table to enforce uniqueness of event ids 
+    * initial table scripts included in ./init-scripts/init.sql 
 
 
-## Deployment
+## Local Deployment
 This service and its dependencies can be all deployed in a local environment via the following docker compose command:
 ```
     $ docker compose up -d

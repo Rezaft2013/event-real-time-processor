@@ -1,6 +1,6 @@
 BINARY_NAME := event-real-time-processor
 
-.PHONY: build run run-db-upgrade clean test fmt vet
+.PHONY: build fmt test integration-test
 
 build:
 	@echo "Building..."
@@ -8,9 +8,15 @@ build:
 	GOTOOLCHAIN=go1.27.0 go build -o $(BINARY_NAME) ./cmd/server/
 	@echo "Build complete."
 
+fmt:
+	go fmt ./...
+
+# Run all tests
 test:
 	GOTOOLCHAIN=go1.27.0 go test -v ./...
 
 # Run only tests labeled with the 'integration' tag
 integration-test:
 	GOTOOLCHAIN=go1.27.0 go test -tags=integration -v ./...
+
+

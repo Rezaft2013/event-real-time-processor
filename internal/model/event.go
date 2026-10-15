@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Event model fields definition
 type Event struct {
 	ID        uuid.UUID `json:"id"`
 	Type      string    `json:"type"`
@@ -14,6 +15,7 @@ type Event struct {
 	Payload   string    `json:"payload"`
 }
 
+// Validate: validates required fields, if validation fails system returns error and does not ingest the event
 func (evt Event) Validate() error {
 	if uuid.Validate(evt.ID.String()) != nil {
 		return errors.New("invalid event id")
