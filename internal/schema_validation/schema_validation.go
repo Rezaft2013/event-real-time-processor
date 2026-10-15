@@ -37,20 +37,11 @@ func NewSchemaValidator() *schemaValidator {
 func (validator schemaValidator) Validate(modelVersion string, jsonValue string) error {
 
 	schema, found := validator.validSchemaVersions[modelVersion]
-
 	if !found {
 		return errors.New("invalid model")
 	}
 
-	if modelVersion == "1.0" {
-		return validator.model_validator(jsonValue, schema)
-	}
-
-	if modelVersion == "1.1" {
-		return validator.model_validator(jsonValue, schema)
-	}
-
-	return errors.New("invalid model")
+	return validator.model_validator(jsonValue, schema)
 }
 
 func (validator schemaValidator) model_validator(jsonValue string, schema string) error {

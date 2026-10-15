@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package api.proto.v1;
+option go_package = "api/proto/v1;eventv1";
+
+import "google/protobuf/timestamp.proto";
+
+message CreateEventRequest {
+  string id        = 1;
+  string type      = 2;
+  string tenant_id = 3;
+  string version   = 4;
+  google.protobuf.Timestamp event_timestamp = 5;
+  string payload   = 6;
+}
+
+message CreateEventResponse {
+}
+
+service EventService {
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+}

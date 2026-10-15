@@ -17,8 +17,9 @@ func Consumer(ctx context.Context) {
 	time.Sleep(5 * time.Second)
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{"broker:29092"},
-		Topic:   "events-topic",
+		Topic:   "events",
 		GroupID: "group-id-1",
+		MaxWait: 500 * time.Millisecond,
 	})
 	defer reader.Close()
 
@@ -26,7 +27,7 @@ func Consumer(ctx context.Context) {
 	for {
 		msg, err := reader.FetchMessage(ctx)
 		if err != nil {
-			log.Printf("kafka consumer error in fetching message, exiting:", err)
+			log.Printf("kafka consumer error in fetching message, error: %v. exiting ...", err)
 			return
 		}
 
@@ -82,7 +83,7 @@ func processEvent(evt *model.Event) error {
 func insertToDeadLetterQueue(evt *model.Event) error {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"broker:29092"},
-		Topic:   "events-deadletter-topic",
+		Topic:   "events-deadletter",
 	})
 	writer.AllowAutoTopicCreation = true
 	defer writer.Close()
@@ -107,7 +108,7 @@ func insertToDeadLetterQueue(evt *model.Event) error {
 func insertEventIntoSenderTopic(evt *model.Event) error {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"broker:29092"},
-		Topic:   "sender-topic",
+		Topic:   "sender",
 	})
 	writer.AllowAutoTopicCreation = true
 	defer writer.Close()
@@ -125,6 +126,6 @@ func insertEventIntoSenderTopic(evt *model.Event) error {
 		log.Println("Failed to write message to sender topic:", err)
 		return err
 	}
-	log.Println("event successfully was written to kafka sender topic")
+	log.Printf("event successfully was written to kafka sender topic")
 	return nil
 }

@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "88:88"    
+      - "50051:50051"
     depends_on:
-      - broker        
+      - broker
+      - postgres
   broker:
     image: apache/kafka:latest
     hostname: broker

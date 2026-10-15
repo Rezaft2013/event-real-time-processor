@@ -26,7 +26,6 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 		return err
 	}
 
-	fmt.Println("Successfully connected to PostgreSQL!")
 	ctx := context.Background()
 	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
@@ -41,7 +40,7 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 			log.Printf("duplicate event %v. skipping.", evt)
 			return nil
 		} else {
-			log.Println("failed to insert event %v into events_global, err = %s", evt, err)
+			log.Printf("failed to insert event %v into events_global, err = %s", evt, err)
 			return fmt.Errorf("failed to insert event %v into events_global", evt)
 		}
 	}
@@ -67,4 +66,22 @@ func InsertEventToDB(evt *model.Event, validationErr error) error {
 
 	fmt.Printf("successfully inserted event %v to database.\n", evt)
 	return nil
+}
+
+func CheckEventExists(id string) (error, bool) {
+	connStr := "host=postgres_db port=5432 user=myuser password=mypassword dbname=events sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Printf("error opening database connection: %v", err)
+		return err, false
+	}
+	defer db.Close()
+
+	loadedID := ""
+	row := db.QueryRow(`SELECT id FROM events_partitioned WHERE id = $1`, id)
+	err = row.Scan(&loadedID)
+	if err == nil {
+		return nil, true
+	}
+	return nil, false
 }
