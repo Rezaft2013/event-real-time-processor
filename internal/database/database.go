@@ -12,6 +12,7 @@ import (
 )
 
 // InsertEventToDB inserts input event and its validation status to events_gloal and events_partitioned ables
+// Using event_id as idempotency key, if event_id already in datasbase simply returns with no error
 func InsertEventToDB(evt *model.Event, validationErr error) (err error) {
 	connStr := "host=postgres_db port=5432 user=myuser password=mypassword dbname=events sslmode=disable"
 	var db *sql.DB

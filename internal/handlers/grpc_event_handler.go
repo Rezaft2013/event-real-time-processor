@@ -19,11 +19,7 @@ func NewEventGRPCHandler() *EventGRPCHandler {
 // CreateEvent handles create event grpc call
 func (h *EventGRPCHandler) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 	var evt model.Event
-	reqUid, err := uuid.Parse(req.Id)
-	if err != nil {
-		return nil, err
-	}
-	evt.ID = reqUid
+
 	evt.Type = req.Type
 	evt.TenantID = req.TenantId
 	evt.Timestamp = req.EventTimestamp.GetSeconds()
@@ -34,7 +30,9 @@ func (h *EventGRPCHandler) CreateEvent(ctx context.Context, req *pb.CreateEventR
 		return nil, err
 	}
 
-	if kafkaLib.WriteEventToTopic("events", &evt) != nil {
+	// event id is used as idempotency key
+	evt.ID = uuid.New()
+	if err := kafkaLib.WriteEventToTopic("events", &evt); err != nil {
 		return nil, err
 	}
 	return &pb.CreateEventResponse{}, nil

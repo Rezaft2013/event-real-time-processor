@@ -6,12 +6,11 @@ option go_package = "api/proto/v1;eventv1";
 import "google/protobuf/timestamp.proto";
 
 message CreateEventRequest {
-  string id        = 1;
-  string type      = 2;
-  string tenant_id = 3;
-  string version   = 4;
-  google.protobuf.Timestamp event_timestamp = 5;
-  string payload   = 6;
+  string type      = 1;
+  string tenant_id = 2;
+  string version   = 3;
+  google.protobuf.Timestamp event_timestamp = 4;
+  string payload   = 5;
 }
 
 message CreateEventResponse {

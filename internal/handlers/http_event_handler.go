@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+
 	"github.com/Rezaft2013/event-real-time-processor/internal/database"
 	kafkaLib "github.com/Rezaft2013/event-real-time-processor/internal/kafka"
 	"github.com/Rezaft2013/event-real-time-processor/internal/model"
@@ -31,13 +33,15 @@ func HttpCreateEventHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// this is used as idempotency key in the system
+	evt.ID = uuid.New()
 	if err := kafkaLib.WriteEventToTopic("events", &evt); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-	_, err = fmt.Fprintf(w, "event received.")
+	_, err = fmt.Fprintf(w, "{ \"event_id\" : \"%s\" }", evt.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

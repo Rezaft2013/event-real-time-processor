@@ -17,16 +17,23 @@ const (
 	eventsTopic           = "events"
 	eventsDeadletterTopic = "events-deadletter"
 	senderTopic           = "sender"
+
+	maxProcessingRetry = 5
 )
 
 // Consumer kafka events topic consumer to read events data to further processing
+// it uses FetchMassage method which reads an event without committing topic offset,
+// processes the event and commits it at the end pf processing
 func Consumer(ctx context.Context) {
 	time.Sleep(5 * time.Second)
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"broker:29092"},
-		Topic:   eventsTopic,
-		GroupID: "group-id-1",
-		MaxWait: 500 * time.Millisecond,
+		Brokers:       []string{"broker:29092"},
+		Topic:         eventsTopic,
+		GroupID:       "group-id-1",
+		MaxWait:       50 * time.Millisecond,
+		MinBytes:      1,
+		MaxBytes:      10 * 1024 * 1024,
+		QueueCapacity: 100,
 	})
 	defer func() {
 		err := reader.Close()
@@ -52,8 +59,8 @@ func Consumer(ctx context.Context) {
 
 		log.Printf("Kafka consumer fetched event: %v", event)
 
+		// processes the event maxProcessingRetry times, if all fail, add it to deadletter queue
 		retryCount := 0
-		maxRetry := 5
 		for {
 			retryCount = retryCount + 1
 
@@ -65,7 +72,7 @@ func Consumer(ctx context.Context) {
 				log.Printf("Kafka consumer error: event:%v, error=%s", event, err)
 			}
 
-			if retryCount >= maxRetry {
+			if retryCount >= maxProcessingRetry {
 				log.Printf("Kafka consumer: too many errors processing event: %v, writing it to dead-letter topic\n", event)
 				if err := WriteEventToTopic(eventsDeadletterTopic, &event); err != nil {
 					log.Printf("failed to add to the events-deadletter queue, event:%v, error=%v", event, err)

@@ -3,27 +3,28 @@
 
 package integration_test
 
-import(
-    "fmt"
+import(    
     "io"
+    "fmt"
     "bytes"
     "testing"
     "time"
     "strings"
     "net/http"
+    "log"
+    "encoding/json"
     "github.com/stretchr/testify/assert"
 )
 
 // TestE2E tests e2e event ingestion 
 // Note: cluster should be up and running before running this test
 func TestE2E(t *testing.T) {
-	jsonData := []byte(`{
-    "id" : "629d06f2-2df9-4d67-af21-70aa4b88ad56",
-    "type" : "first2",
-    "tenant_id" : "first_tenant",
-    "version" : "1.0",
-    "timestamp" : 1791700437,
-    "payload" : "{ \"name\" : \"reza\", \"email\" : \"test@test.com\" } "
+	jsonData := []byte(`{    
+        "type" : "first2",
+        "tenant_id" : "first_tenant",
+        "version" : "1.0",
+        "timestamp" : 1791700437,
+        "payload" : "{ \"name\" : \"reza\", \"email\" : \"test@test.com\" } "
     }`)
 	
 	req, _ := http.NewRequest("POST", "http://localhost:88/api/v1/events", bytes.NewBuffer(jsonData))
@@ -39,11 +40,17 @@ func TestE2E(t *testing.T) {
     assert.NotNil(t, resp)
 
 	body, _ := io.ReadAll(resp.Body)	
-    log.Println(string(body))
-    assert.Equal(t, strings.Contains(string(body), "event received"), true, "failed to create the event")
+    assert.Equal(t, resp.StatusCode, http.StatusAccepted)    
+
+    type Resp struct {
+        EventID string `json:"event_id"`
+    }
+    var res Resp
+    err = json.Unmarshal(body, &res)    
+    assert.Nil(t, err)    
 
     time.Sleep(5*time.Second)
-	getResp, _ := http.Get("http://localhost:88/api/v1/events/629d06f2-2df9-4d67-af21-70aa4b88ad56")	
+	getResp, _ := http.Get(fmt.Sprintf("http://localhost:88/api/v1/events/%s", res.EventID))
     defer getResp.Body.Close()
 
 	body, _ = io.ReadAll(getResp.Body)

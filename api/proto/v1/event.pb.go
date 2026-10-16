@@ -24,12 +24,11 @@ const (
 
 type CreateEventRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Type           string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	TenantId       string                 `protobuf:"bytes,3,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	Version        string                 `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
-	EventTimestamp *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=event_timestamp,json=eventTimestamp,proto3" json:"event_timestamp,omitempty"`
-	Payload        string                 `protobuf:"bytes,6,opt,name=payload,proto3" json:"payload,omitempty"`
+	Type           string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	TenantId       string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Version        string                 `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	EventTimestamp *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=event_timestamp,json=eventTimestamp,proto3" json:"event_timestamp,omitempty"`
+	Payload        string                 `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -62,13 +61,6 @@ func (x *CreateEventRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateEventRequest.ProtoReflect.Descriptor instead.
 func (*CreateEventRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_event_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *CreateEventRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
 }
 
 func (x *CreateEventRequest) GetType() string {
@@ -146,14 +138,13 @@ var File_api_proto_v1_event_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_event_proto_rawDesc = "" +
 	"\n" +
-	"\x18api/proto/v1/event.proto\x12\fapi.proto.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xce\x01\n" +
-	"\x12CreateEventRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1b\n" +
-	"\ttenant_id\x18\x03 \x01(\tR\btenantId\x12\x18\n" +
-	"\aversion\x18\x04 \x01(\tR\aversion\x12C\n" +
-	"\x0fevent_timestamp\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x0eeventTimestamp\x12\x18\n" +
-	"\apayload\x18\x06 \x01(\tR\apayload\"\x15\n" +
+	"\x18api/proto/v1/event.proto\x12\fapi.proto.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x01\n" +
+	"\x12CreateEventRequest\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1b\n" +
+	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\tR\aversion\x12C\n" +
+	"\x0fevent_timestamp\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x0eeventTimestamp\x12\x18\n" +
+	"\apayload\x18\x05 \x01(\tR\apayload\"\x15\n" +
 	"\x13CreateEventResponse2b\n" +
 	"\fEventService\x12R\n" +
 	"\vCreateEvent\x12 .api.proto.v1.CreateEventRequest\x1a!.api.proto.v1.CreateEventResponseB\x16Z\x14api/proto/v1;eventv1b\x06proto3"
